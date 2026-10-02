@@ -2,12 +2,14 @@ import { Test } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersService } from "./users.service";
 import { User } from "./user.entity";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 
 describe('AuthService', () => {
     let service: AuthService;
+    let fakeUsersService: Partial<UsersService>;
 
     beforeEach(async () => {
-        const fakeUsersService: Partial<UsersService> = {
+        fakeUsersService = {
             find: () => Promise.resolve([]),
             create: (email: string, password: string) =>
                 Promise.resolve({ id: 1, email, password } as User)
@@ -39,5 +41,23 @@ describe('AuthService', () => {
 
         expect(salt).toBeDefined();
         expect(hash).toBeDefined();
+    });
+
+    it('throws an error if user signes up with email that is already in use', (done) => {
+        fakeUsersService.find = () => Promise.resolve([{ id: 1, email: 'example@gmail.com', password: 'testPass' } as User]);
+
+        service.signup('e@gmail.com', 'newPass').then(
+            () => done(new Error('Expected signup to throw')),
+            (err) => {
+                expect(err).toBeInstanceOf(BadRequestException);
+                done();
+            }
+        );
+    });
+
+    it('throws if signin is called with an unused email', async () => {
+        await expect(
+            service.signin('exmaple@gmail.com', 'pass'),
+        ).rejects.toThrow(NotFoundException);
     });
 });
