@@ -49,6 +49,8 @@ lerna-debug.log*
 .env.development
 .env.test
 
+test.sqlite
+
 # Runtime data
 pids
 *.pid
