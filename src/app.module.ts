@@ -11,43 +11,46 @@ import { Report } from './reports/report.entity';
 const cookieSession = require('cookie-session');
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-    }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          type: 'better-sqlite3',
-          database: config.get<string>('DB_NAME'),
-          synchronize: true,
-          entities: [User, Report],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: `.env.${process.env.NODE_ENV}`,
+        }),
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (config: ConfigService) => {
+                return {
+                type: 'better-sqlite3',
+                database: config.get<string>('DB_NAME'),
+                synchronize: true,
+                entities: [User, Report],
+            }
         }
-      }
-    }),
-    UsersModule,
-    ReportsModule
-  ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true,
-      }),
-    },
-  ],
+        }),
+        UsersModule,
+        ReportsModule
+    ],
+    controllers: [AppController],
+    providers: [
+        AppService,
+        {
+            provide: APP_PIPE,
+            useValue: new ValidationPipe({
+                whitelist: true,
+            }),
+        },
+    ],
 })
 
 export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(
-      cookieSession({
-        keys: ['fefw32rfds']
-      }),
-    ).forRoutes('*');
-  }
+    constructor(private configService: ConfigService) {}
+
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(
+            cookieSession({
+                keys: [this.configService.get('COOKIE_KEY')]
+            }
+        ),
+        ).forRoutes('*');
+    }
 }
