@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, AfterInsert, AfterRemove, AfterUpdate, OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Report } from 'src/reports/report.entity';
+import { Report } from '../reports/report.entity';
 
 @Entity()
 export class User {
