@@ -16,6 +16,14 @@ describe('Authentication system', () => {
     await app.init();
   });
 
+  it('debug signup', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({ email: 'debug@gmail.com', password: '12345678' });
+
+    console.log(res.status, res.text);
+  });
+
   it('handles a signup request', () => {
     const email = 'mytestemail2@gmail.com';
 
